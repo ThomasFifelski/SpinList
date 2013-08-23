@@ -24,68 +24,72 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Class for asynchronous launching the process of retrieving information over
  * HTTP. The fetching of data is processed on the background thread and the
  * result is passed to the UI thread.
- */
+ */// extends Async task to fetch data
 public class FetchDataTask extends AsyncTask<Void, Void, FbUser> {
+  //create objects
     private LazyAdapter adapter;
     private int position;
     private String id;
-
-    /**
-     * Get LazyAdapter to work with.
-     */
-    public FetchDataTask(LazyAdapter adapter, int position) {
-        this.adapter = adapter;
+//setting adapter to get item in a specific postion
+    public FetchDataTask(LazyAdapter adapter, int position){
+        this.adapter =adapter;
         this.position = position;
         this.id = (String) adapter.getItem(position);
     }
 
-    /**
-     * Background bitmap fetching and pasting it into FbUser.
-     */
-    @Override
-    protected FbUser doInBackground(Void... params) {
+    @Override//do in background UI
+    protected  FbUser doInBackground(Void... params){
         FbUser user = new FbUser(id);
 
         Bitmap bitmap = null;
-        try {
+        try{
             HttpURLConnection httpUrlConnection;
-            httpUrlConnection = (HttpURLConnection) new java.net.URL(
-                    user.getPicture()).openConnection();
+            // make connection and get picture
+            httpUrlConnection = (HttpURLConnection)new URL(user.getPicture()).openConnection();
+//           time out after 10000
             httpUrlConnection.setReadTimeout(10000);
             httpUrlConnection.setConnectTimeout(10000);
+//           convert information coming in?
             InputStream inputStream = httpUrlConnection.getInputStream();
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(
-                    inputStream);
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
             bitmap = BitmapFactory.decodeStream(bufferedInputStream);
             bufferedInputStream.close();
             inputStream.close();
             httpUrlConnection.disconnect();
 
-        } catch (MalformedURLException e) {
-        } catch (IOException e) {
+
+
+        }catch (MalformedURLException e){
+        }catch (IOException e){
         }
-
+//return  user
         user.setBitmap(bitmap);
-
         return user;
-    }
 
-    /**
-     * Caching user after it's retrieving.
-     */
+
+
+
+
+    }
     @Override
-    protected void onPostExecute(FbUser result) {
+    protected void onPostExecute(FbUser result){
         super.onPostExecute(result);
+//       cache results
         adapter.cacheUser(result);
 
-        //recursive call of an asynchronous task
-        if (position < adapter.getCount() - 1) {
+        if(position<adapter.getCount()-1){
             new FetchDataTask(adapter, ++position).execute();
         }
     }
+
+
+
+
 }
+

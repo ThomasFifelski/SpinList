@@ -32,51 +32,62 @@ import java.io.ByteArrayOutputStream;
  * arbitrary info. Fb API was chosen for access simplicity.
  */
 public class FbUser {
-    private final String GRAPH_API_URL = "https://graph.facebook.com/user?fields=picture,name";
+    private final String Graph_API_URL = "https://graph.facebook.com/user?feilds=pictures,name";
     private String name;
     private String picture;
     private Bitmap bitmap;
 
-    public FbUser(String id) {
-        /**
-         * Retrieving information about user from Graph API by parsing JSON
-         * responce. Downloading it's userpic.
-         */
-        try {
+    public  FbUser(String id){
+
+        try{
+//            HttpClient is geting Graph api url and replaceing user id
             HttpClient httpClient = new DefaultHttpClient();
             HttpResponse httpResponse = httpClient.execute(new HttpGet(
-                    GRAPH_API_URL.replace("user", id)));
+                    Graph_API_URL.replace("user",id)));
             StatusLine statusLine = httpResponse.getStatusLine();
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+//            getting status and place as string
+            if (statusLine.getStatusCode()== HttpStatus.SC_OK){
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 httpResponse.getEntity().writeTo(out);
                 out.close();
                 String responseString = out.toString();
-
+//create jSon object and get
                 JSONObject object = (JSONObject) new JSONTokener(responseString)
                         .nextValue();
+//              get pic data and url assicated with pic
+
                 this.picture = object.getJSONObject("picture").getJSONObject("data").getString("url");
+//              get name string
                 this.name = object.getString("name");
-            } else {
+            }else {
                 httpResponse.getEntity().getContent().close();
+
             }
         } catch (Exception e) {
         }
-    }
 
-    public String getName() {
-        return name;
     }
+//    return type specified
+     public String getName(){
 
-    public String getPicture() {
+         return name;
+
+     }
+    public String getPicture(){
         return picture;
     }
 
-    public Bitmap getBitmap() {
+    public  Bitmap getBitmap(){
         return this.bitmap;
     }
-
-    public void setBitmap(Bitmap bitmap) {
+    public void setBitmap (Bitmap bitmap){
         this.bitmap = bitmap;
     }
+
+
+
+
+
+
+
 }
